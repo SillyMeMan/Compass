@@ -1,3 +1,7 @@
+env:
+  MINECRAFT_VERSION: 1.19.2
+  MOD_VERSION: 0.3.4
+
 name: Build Mod
 
 on:
@@ -39,5 +43,5 @@ jobs:
       - name: Upload mod jar
         uses: actions/upload-artifact@v4
         with:
-          name: mod-jar
+          name: compass-${{env.version}}-1.19.2
           path: build/libs/*.jar
