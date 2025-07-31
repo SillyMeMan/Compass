@@ -37,6 +37,13 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Extract version from gradle.properties
+        id: extract_version
+        run: |
+          VERSION=$(grep "^version=" gradle.properties | cut -d'=' -f2)
+          echo "Extracted version: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_ENV
+
       - name: Build the mod
         run: ./gradlew build
 
