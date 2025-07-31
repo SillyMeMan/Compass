@@ -6,15 +6,16 @@
 		"version": "${version}",
 		"metadata": {
 			"name": "LodestoneLib",
-			"description": "Library for all of the Lodestone team's projects, now 10% more gay",
+			"description": "A forked library for my private mods, now even weirder",
 			"contributors": {
 				"Sammy": "Author",
-				"Arathain": "Porter"
+				"Arathain": "Original Porter",
+				"Me!": "Forking hell"
 			},
 			"contact": {
 				"homepage": "",
-				"issues": "https://github.com/Arathain/OrtusLib/issues",
-				"sources": "https://github.com/Arathain/OrtusLib"
+				"issues": "",
+				"sources": ""
 			},
 			"icon": "assets/ortus/icon.png"
 		},
