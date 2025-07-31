@@ -37,14 +37,18 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Extract mod version
-        id: extract_version
+      - name: Extract mod & mc version from gradle.properties
         run: |
-          MOD_VERSION=$(grep "^mod_version=" gradle.properties | cut -d'=' -f2)
-          echo "mod_version=$MOD_VERSION" >> $GITHUB_ENV
+          echo "Reading gradle.properties..."
+          echo "mod_version=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
 
       - name: Build the mod
         run: ./gradlew build
+
+      - name: Echo versions
+        run: |
+          echo "mod_version: ${{ env.mod_version }}"
+          echo "minecraft_version: ${{ env.minecraft_version }}"
 
       - name: Upload mod jar
         uses: actions/upload-artifact@v4
