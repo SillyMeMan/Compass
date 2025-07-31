@@ -40,10 +40,15 @@ jobs:
       - name: Dump gradle.properties contents
         run: cat gradle.properties
 
-      - name: Extract mod & mc version from gradle.properties
+      - name: Extract versions from gradle.properties
+        id: extract_versions
         run: |
-          echo "Reading gradle.properties..."
-          echo "mod_version=$(grep '^mod_version=' gradle.properties | cut -d'=' -f2)" >> $GITHUB_ENV
+          echo "Dumping gradle.properties"
+          cat gradle.properties
+
+          MOD_VERSION=$(grep "^mod_version=" gradle.properties | cut -d'=' -f2 | tr -d '\r')
+
+          echo "mod_version=$MOD_VERSION" >> $GITHUB_ENV
 
       - name: Build the mod
         run: ./gradlew build
