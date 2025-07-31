@@ -40,13 +40,10 @@ jobs:
       - name: Dump gradle.properties contents
         run: cat gradle.properties
 
-      - name: Extract versions from gradle.properties
+      - name: Extract versions from gradle.properties (robust)
         id: extract_versions
         run: |
-          echo "Dumping gradle.properties"
-          cat gradle.properties
-
-          MOD_VERSION=$(grep "^mod_version=" gradle.properties | cut -d'=' -f2 | tr -d '\r')
+          MOD_VERSION=$(awk -F= '/^mod_version/ { gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2 }' gradle.properties)
 
           echo "mod_version=$MOD_VERSION" >> $GITHUB_ENV
 
@@ -56,7 +53,6 @@ jobs:
       - name: Echo versions
         run: |
           echo "mod_version: ${{ env.mod_version }}"
-          echo "minecraft_version: ${{ env.minecraft_version }}"
 
       - name: Upload mod jar
         uses: actions/upload-artifact@v4
