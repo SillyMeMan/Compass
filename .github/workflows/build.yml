@@ -37,12 +37,11 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Extract version from gradle.properties
+      - name: Extract mod version
         id: extract_version
         run: |
-          VERSION=$(grep "^version=" gradle.properties | cut -d'=' -f2)
-          echo "Extracted version: $VERSION"
-          echo "version=$VERSION" >> $GITHUB_ENV
+          MOD_VERSION=$(grep "^mod_version=" gradle.properties | cut -d'=' -f2)
+          echo "mod_version=$MOD_VERSION" >> $GITHUB_ENV
 
       - name: Build the mod
         run: ./gradlew build
@@ -50,5 +49,5 @@ jobs:
       - name: Upload mod jar
         uses: actions/upload-artifact@v4
         with:
-          name: compass-${{env.version}}-1.19.2
+          name: compass-${{ env.mod_version }}-1.19.2
           path: build/libs/*.jar
