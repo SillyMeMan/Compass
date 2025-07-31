@@ -37,6 +37,9 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Dump gradle.properties contents
+        run: cat gradle.properties
+
       - name: Extract mod & mc version from gradle.properties
         run: |
           echo "Reading gradle.properties..."
