@@ -4,8 +4,8 @@
     "srcrgb": "srcalpha",
     "dstrgb": "1-srcalpha"
   },
-  "vertex": "lodestone:generic",
-  "fragment": "lodestone:vfx/scrolling_texture",
+  "vertex": "compass:generic",
+  "fragment": "compass:vfx/scrolling_texture",
   "attributes": [
     "Position",
     "Color",

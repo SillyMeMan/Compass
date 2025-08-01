@@ -4,8 +4,8 @@
     "srcrgb": "srcalpha",
     "dstrgb": "1-srcalpha"
   },
-  "vertex": "lodestone:generic",
-  "fragment": "lodestone:noise/metallic",
+  "vertex": "compass:generic",
+  "fragment": "compass:noise/metallic",
   "attributes": [
     "Position",
     "Color",

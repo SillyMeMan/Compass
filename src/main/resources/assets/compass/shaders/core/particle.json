@@ -4,8 +4,8 @@
     "srcrgb": "srcalpha",
     "dstrgb": "1-srcalpha"
   },
-  "vertex": "lodestone:particle",
-  "fragment": "lodestone:particle",
+  "vertex": "compass:particle",
+  "fragment": "compass:particle",
   "attributes": [
     "Position",
     "UV0",

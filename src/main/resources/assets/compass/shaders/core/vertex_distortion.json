@@ -4,8 +4,8 @@
     "srcrgb": "srcalpha",
     "dstrgb": "1-srcalpha"
   },
-  "vertex": "lodestone:vertex_distortion",
-  "fragment": "lodestone:additive_texture",
+  "vertex": "compass:vertex_distortion",
+  "fragment": "compass:additive_texture",
   "attributes": [
     "Position",
     "Color",
