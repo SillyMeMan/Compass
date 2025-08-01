@@ -39,7 +39,8 @@ dependencies {
 	modImplementation libs.midnightlib
 	modImplementation libs.bundles.cardinal.components
 
-	modImplementation include(libs.emi)
+	modImplementation libs.emi
+	include(libs.emi)
 }
 
 processResources {
