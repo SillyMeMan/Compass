@@ -1,11 +1,11 @@
 {
 	"schema_version": 1,
 	"quilt_loader": {
-		"group": "com.sammy.lodestone",
-		"id": "lodestone",
+		"group": "net.vinh.compass",
+		"id": "compass",
 		"version": "${version}",
 		"metadata": {
-			"name": "LodestoneLib",
+			"name": "Compass",
 			"description": "A forked library for my private mods, now even weirder",
 			"contributors": {
 				"Sammy": "Author",
@@ -21,8 +21,8 @@
 		},
 		"intermediate_mappings": "net.fabricmc:intermediary",
 		"entrypoints": {
-			"init": "com.sammy.lodestone.LodestoneLib",
-			"client_init": "com.sammy.lodestone.LodestoneLibClient"
+			"init": "net.vinh.compass.CompassLib",
+			"client_init": "net.vinh.compass.CompassLibClient"
 		},
 		"depends": [
 			{
@@ -39,6 +39,6 @@
 			}
 		]
 	},
-	"access_widener": "lodestone.accesswidener",
-	"mixin": "lodestone.mixins.json"
+	"access_widener": "compass.accesswidener",
+	"mixin": "compass.mixins.json"
 }

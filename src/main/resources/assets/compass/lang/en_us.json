@@ -1,0 +1,11 @@
+{
+  "attribute.name.compass.magic_damage": "Magic Damage",
+  "attribute.name.compass.magic_proficiency": "Magic Proficiency",
+  "attribute.name.compass.magic_resistance": "Magic Resistance",
+  "command.compass.devsetup": "World setup for not-annoying development work",
+  "command.compass.screenshake": "Command Successful, enjoy your screenshake.",
+  "compass.midnightconfig.SCREENSHAKE_INTENSITY": "Screenshake Intensity",
+  "compass.midnightconfig.title": "LodestoneLib Config",
+  "options.compass.screenshake_intensity.tooltip": "Controls how much screenshake is applied to your screen.",
+  "compass.midnightconfig.DELAYED_RENDERING": "Delayed Rendering"
+}
