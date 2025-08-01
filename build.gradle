@@ -39,8 +39,7 @@ dependencies {
 	modImplementation libs.midnightlib
 	modImplementation libs.bundles.cardinal.components
 
-	modImplementation libs.emi
-	include(libs.emi)
+	modImplementation include("dev.emi:emi-fabric:1.0.19+1.19.2")
 }
 
 processResources {
