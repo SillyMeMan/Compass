@@ -57,7 +57,7 @@ public class ClientCastUIRenderer {
 
 		int textWidth = textRenderer.getWidth(displayText);
 		int x = (screenWidth - textWidth) / 2;
-		int y = screenHeight / 2 + 50;
+		int y = screenHeight / 2 - 50;
 
 		int color = switch (currentMode) {
 			case CHARGING -> 0xFFFFAA00; // orange

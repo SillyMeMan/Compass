@@ -142,8 +142,6 @@ public class CompassUtil {
 			double distSq = dx * dx + dy * dy + dz * dz;
 
 			if (distSq <= radiusSq) {
-				double dist = Math.sqrt(distSq);
-
 				Vec3d direction = entity.getPos().subtract(center).normalize();
 				Vec3d knockback = new Vec3d(direction.x, direction.y + 1.5, direction.z).normalize().multiply(knockbackMultiplier);
 
@@ -200,7 +198,7 @@ public class CompassUtil {
 		}
 	}
 
-	public class ExplosionScheduler {
+	public static class ExplosionScheduler {
 		private static final int BLOCKS_PER_TICK = 200;
 		private static final Queue<BlockBreakTask> TASK_QUEUE = new ArrayDeque<>();
 
