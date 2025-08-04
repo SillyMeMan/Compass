@@ -19,6 +19,9 @@ public class DamageContext {
 	// Optional configs
 	public int bounceTicks = 3;
 	public int tickInterval = 10;
+
+	public int damageTicks = 10;
+
 	public Random random = new Random();
 
 	public Vec3d knockback = Vec3d.ZERO;
@@ -39,6 +42,11 @@ public class DamageContext {
 
 	public DamageContext setTickInterval(int interval) {
 		this.tickInterval = interval;
+		return this;
+	}
+
+	public DamageContext setDamageTicks(int damageTicks) {
+		this.damageTicks = damageTicks;
 		return this;
 	}
 
