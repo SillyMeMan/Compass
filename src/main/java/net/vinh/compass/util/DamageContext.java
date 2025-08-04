@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 public class DamageContext {
-	public final List<? extends LivingEntity> targets;
+	public final List<LivingEntity> targets;
 	public final float baseDamage;
 	public final DamageSource source;
 	public final World world;
@@ -24,7 +24,7 @@ public class DamageContext {
 	public Vec3d knockback = Vec3d.ZERO;
 	public List<StatusEffectInstance> statusEffects = List.of();
 
-	public DamageContext(List<? extends LivingEntity> targets, float baseDamage, DamageSource source, World world) {
+	public DamageContext(List<LivingEntity> targets, float baseDamage, DamageSource source, World world) {
 		this.targets = targets;
 		this.baseDamage = baseDamage;
 		this.source = source;

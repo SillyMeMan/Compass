@@ -4,7 +4,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
@@ -136,10 +138,8 @@ public class CompassUtil {
 			center.x + radius, center.y + radius, center.z + radius
 		);
 
-		List<Entity> entities = world.getOtherEntities(null, box);
-		Set<Entity> processed = new HashSet<>();
+		List<LivingEntity> entities = world.getEntitiesByClass(LivingEntity.class, box, entity -> entity instanceof LivingEntity && entity != user);
 
-		// Block destruction
 		for (int x = -intRadius; x <= intRadius; x++) {
 			for (int y = -intRadius; y <= intRadius; y++) {
 				for (int z = -intRadius; z <= intRadius; z++) {
@@ -156,30 +156,21 @@ public class CompassUtil {
 			}
 		}
 
-		// Entity damage/knockback
-		for (Entity entity : entities) {
-			if (entity == user) continue;
-
+		for(LivingEntity entity : entities) {
 			double dx = entity.getX() - center.x;
 			double dy = entity.getY() - center.y;
 			double dz = entity.getZ() - center.z;
 			double distSq = dx * dx + dy * dy + dz * dz;
 
-			if (distSq <= radiusSq && !processed.contains(entity)) {
+			if (distSq <= radiusSq) {
 				double dist = Math.sqrt(distSq);
-				double exposure = 1.0 - (dist / radius);
-				float damage = (float)(exposure * maxDamage);
-
-				entity.damage(DamageSource.explosion(user), damage);
 
 				Vec3d direction = entity.getPos().subtract(center).normalize();
-				Vec3d knockback = new Vec3d(direction.x, direction.y + 1.5, direction.z).normalize()
-					.multiply(exposure * knockbackMultiplier);
+				Vec3d knockback = new Vec3d(direction.x, direction.y + 1.5, direction.z).normalize().multiply(knockbackMultiplier);
 
-				entity.addVelocity(knockback.x, knockback.y, knockback.z);
-				entity.velocityModified = true;
+				DamageContext ctx = new DamageContext(List.of(entity), maxDamage / entities.size(), DamageSource.explosion(user), world).withKnockback(knockback).withStatusEffects(List.of(new StatusEffectInstance(StatusEffects.WEAKNESS, 10, 10, true, true)));
 
-				processed.add(entity);
+				damageWithCustomLogic(CompassDamageCalculationTypes.SINGLE_TARGET, ctx);
 			}
 		}
 
