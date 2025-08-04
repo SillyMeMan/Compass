@@ -2,7 +2,9 @@ package net.vinh.compass.util;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
@@ -21,11 +23,6 @@ import java.util.random.RandomGenerator;
 
 public class CompassUtil {
 	private static final RandomGenerator random = RandomGenerator.getDefault();
-
-	public static void delayTask(Runnable runnable, long delay, TimeUnit timeUnit) {
-		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-		executor.schedule(runnable, delay, timeUnit);
-	}
 
 	public static int getInt(int origin, int bound) {
 		return random.nextInt(origin, bound);
@@ -193,6 +190,20 @@ public class CompassUtil {
 		if (emitParticle) {
 			world.spawnParticles(ParticleTypes.EXPLOSION_EMITTER, center.x, center.y, center.z, 1, 0, 0, 0, 0);
 		}
+	}
 
+	public static void damageWithCustomLogic(CompassDamageCalculationType damageCalculationType, DamageContext context) {
+		damageCalculationType.applyWithCustomLogic(context);
+	}
+
+	public static void applyKnockbackAndEffects(DamageContext ctx, LivingEntity target) {
+		if (!ctx.knockback.equals(Vec3d.ZERO)) {
+			target.addVelocity(ctx.knockback.x, ctx.knockback.y, ctx.knockback.z);
+			target.velocityModified = true;
+		}
+
+		for (StatusEffectInstance effect : ctx.statusEffects) {
+			target.addStatusEffect(new StatusEffectInstance(effect));
+		}
 	}
 }
