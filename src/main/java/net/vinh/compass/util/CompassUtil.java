@@ -11,6 +11,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.*;
+import net.vinh.compass.config.ClientConfig;
 
 import java.util.*;
 import java.util.random.RandomGenerator;
@@ -199,7 +200,7 @@ public class CompassUtil {
 	}
 
 	public static class ExplosionScheduler {
-		private static final int BLOCKS_PER_TICK = 200;
+		private static final int BLOCKS_PER_TICK = 20;
 		private static final Queue<BlockBreakTask> TASK_QUEUE = new ArrayDeque<>();
 
 		public static void queueExplosion(ServerWorld world, BlockPos center, int radius) {
