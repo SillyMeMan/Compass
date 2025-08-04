@@ -2,6 +2,7 @@ package net.vinh.compass.util;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.vinh.compass.CompassLib;
 
 import static net.vinh.compass.util.CompassUtil.getInt;
 
@@ -33,13 +34,18 @@ public enum CompassDamageCalculationTypes implements CompassDamageCalculationTyp
 
 		float finalDamage = ctx.baseDamage / ctx.bounceTicks;
 
-		for (int i = 0; i < ctx.bounceTicks; i++) {
+		for (int i = 0; i < ctx.bounceTicks;) {
 			int delay = i * ctx.tickInterval;
 			LivingEntity target = ctx.targets.get(ctx.random.nextInt(ctx.targets.size() - 1));
-
-			if (ctx.world instanceof ServerWorld serverWorld) {
-				ServerScheduledExecutorService.schedule(ctx.tickInterval, () -> target.damage(ctx.source, finalDamage));
-				CompassUtil.applyKnockbackAndEffects(ctx, target);
+			if(target.isAlive()) {
+				if(ctx.world instanceof ServerWorld) {
+					ServerScheduledExecutorService.schedule(delay, () -> target.damage(ctx.source, finalDamage));
+					CompassUtil.applyKnockbackAndEffects(ctx, target);
+					i++;
+				}
+			}
+			else {
+				CompassLib.LOGGER.warn("Entity {} doesn't exist", target);
 			}
 		}
 	}));
