@@ -1,10 +1,8 @@
 package net.vinh.compass.util;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,14 +12,9 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
 import java.util.random.RandomGenerator;
+import java.util.stream.Collectors;
 
 public class CompassUtil {
 	private static final RandomGenerator random = RandomGenerator.getDefault();
@@ -140,21 +133,7 @@ public class CompassUtil {
 
 		List<LivingEntity> entities = world.getEntitiesByClass(LivingEntity.class, box, entity -> entity instanceof LivingEntity && entity != user);
 
-		for (int x = -intRadius; x <= intRadius; x++) {
-			for (int y = -intRadius; y <= intRadius; y++) {
-				for (int z = -intRadius; z <= intRadius; z++) {
-					BlockPos pos = centerPos.add(x, y, z);
-					double distSq = centerPos.getSquaredDistance(pos);
-
-					if (distSq <= radiusSq) {
-						BlockState state = world.getBlockState(pos);
-						if (!state.isAir() && state.getBlock().getBlastResistance() < 50.0F) {
-							world.breakBlock(pos, true);
-						}
-					}
-				}
-			}
-		}
+		ExplosionScheduler.queueExplosion(world, centerPos, intRadius);
 
 		for(LivingEntity entity : entities) {
 			double dx = entity.getX() - center.x;
@@ -195,6 +174,79 @@ public class CompassUtil {
 
 		for (StatusEffectInstance effect : ctx.statusEffects) {
 			target.addStatusEffect(new StatusEffectInstance(effect));
+		}
+	}
+
+	public static class SphereCache {
+		private static final Map<Integer, List<BlockPos>> SPHERE_OFFSETS = new HashMap<>();
+
+		public static List<BlockPos> getOffsets(int radius) {
+			return SPHERE_OFFSETS.computeIfAbsent(radius, SphereCache::generateOffsets);
+		}
+
+		private static List<BlockPos> generateOffsets(int radius) {
+			List<BlockPos> result = new ArrayList<>();
+			int radiusSq = radius * radius;
+			for (int x = -radius; x <= radius; x++) {
+				for (int y = -radius; y <= radius; y++) {
+					for (int z = -radius; z <= radius; z++) {
+						if (x * x + y * y + z * z <= radiusSq) {
+							result.add(new BlockPos(x, y, z));
+						}
+					}
+				}
+			}
+			return result;
+		}
+	}
+
+	public class ExplosionScheduler {
+		private static final int BLOCKS_PER_TICK = 200;
+		private static final Queue<BlockBreakTask> TASK_QUEUE = new ArrayDeque<>();
+
+		public static void queueExplosion(ServerWorld world, BlockPos center, int radius) {
+			List<BlockPos> relativeOffsets = SphereCache.getOffsets(radius);
+			List<BlockPos> absolutePositions = relativeOffsets.stream()
+				.map(center::add)
+				.collect(Collectors.toList());
+
+			TASK_QUEUE.add(new BlockBreakTask(world, absolutePositions));
+		}
+
+		public static void tick(ServerWorld world) {
+			if (TASK_QUEUE.isEmpty()) return;
+
+			BlockBreakTask task = TASK_QUEUE.peek();
+			task.tick(world);
+			if (task.isComplete()) {
+				TASK_QUEUE.poll();
+			}
+		}
+
+		private static class BlockBreakTask {
+			private final ServerWorld world;
+			private final Iterator<BlockPos> positions;
+
+			public BlockBreakTask(ServerWorld world, List<BlockPos> positions) {
+				this.world = world;
+				this.positions = positions.iterator();
+			}
+
+			public void tick(ServerWorld world) {
+				int count = 0;
+				while (positions.hasNext() && count < BLOCKS_PER_TICK) {
+					BlockPos pos = positions.next();
+					BlockState state = world.getBlockState(pos);
+					if (!state.isAir() && state.getBlock().getBlastResistance() < 50.0F) {
+						world.breakBlock(pos, true);
+					}
+					count++;
+				}
+			}
+
+			public boolean isComplete() {
+				return !positions.hasNext();
+			}
 		}
 	}
 }

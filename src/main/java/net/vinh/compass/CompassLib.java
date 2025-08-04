@@ -1,5 +1,6 @@
 package net.vinh.compass;
 
+import net.minecraft.server.world.ServerWorld;
 import net.vinh.compass.helpers.OrtTestItem;
 import net.vinh.compass.setup.CompassParticles;
 import net.minecraft.item.ItemGroup;
@@ -7,6 +8,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.random.RandomGenerator;
 import net.minecraft.util.registry.Registry;
+import net.vinh.compass.util.CompassUtil;
 import net.vinh.compass.util.ServerScheduledExecutorService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +32,11 @@ public class CompassLib implements ModInitializer {
 		}
 
 		ServerTickEvents.START.register(ServerScheduledExecutorService::tick);
+		ServerTickEvents.END.register(world -> {
+			if (!world.getOverworld().isClient()) {
+				CompassUtil.ExplosionScheduler.tick(world.getOverworld());
+			}
+		});
 	}
 	public static Identifier id(String path) {
 		return new Identifier(MODID, path);
