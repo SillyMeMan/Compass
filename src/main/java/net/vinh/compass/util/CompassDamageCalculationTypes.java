@@ -42,7 +42,13 @@ public enum CompassDamageCalculationTypes implements CompassDamageCalculationTyp
 
 	}),
 	SINGLE_TARGET ((ctx -> {
-		LivingEntity target = ctx.targets.get(getInt(0, ctx.targets.size() - 1));
+		LivingEntity target;
+		if(ctx.targets.size() > 1) {
+			target = ctx.targets.get(ctx.random.nextInt(ctx.targets.size() - 1));
+		}
+		else {
+			target = ctx.targets.get(0);
+		}
 
 		float finalDamage = ctx.baseDamage / ctx.damageTicks;
 
@@ -55,39 +61,41 @@ public enum CompassDamageCalculationTypes implements CompassDamageCalculationTyp
 			});
 		}
 	})),
-	BOUNCE ((ctx -> {
-		if(ctx.targets.isEmpty()) return;
+	BOUNCE((ctx) -> {
+		if (ctx.targets.isEmpty()) return;
+
+		ctx.targets.removeIf(LivingEntity::isDead);
+		if (ctx.targets.size() < 2) {
+			AOE.applyWithCustomLogic(ctx.setDamageTicks(ctx.bounceTicks).setTickInterval(ctx.tickInterval));
+			return;
+		}
 
 		float finalDamage = ctx.baseDamage / ctx.bounceTicks;
 
-		for (int i = 0; i < ctx.bounceTicks;) {
-			List<Boolean> isAllDead = new ArrayList<>(List.of());
-			ctx.targets.forEach(entity -> {
-				isAllDead.add(entity.isDead());
-			});
-			if(isAllDead.contains(false)) {
-				int delay = i * ctx.tickInterval;
+		for (int i = 0; i < ctx.bounceTicks; ) {
+			// Filter alive targets again just in case
+			List<LivingEntity> aliveTargets = ctx.targets.stream()
+				.filter(LivingEntity::isAlive)
+				.toList();
 
-				LivingEntity target = ctx.targets.get(ctx.random.nextInt(ctx.targets.size() - 1));
-				if(target.isAlive()) {
-					if(ctx.world instanceof ServerWorld) {
-						ServerScheduledExecutorService.schedule(delay, () -> {
-							target.damage(ctx.source, finalDamage);
-							CompassUtil.applyKnockbackAndEffects(ctx, target);
-						});
-						i++;
-					}
-				}
-				else {
-					CompassLib.LOGGER.warn("Entity {} doesn't exist", target);
-				}
-			}
-			else {
-				CompassLib.LOGGER.warn("All entities provided are already dead. Suppressing potential infinite loop");
+			if (aliveTargets.size() < 2) {
+				CompassLib.LOGGER.warn("Insufficient valid targets for bounce. Falling back to AoE.");
+				AOE.applyWithCustomLogic(ctx.setDamageTicks(ctx.bounceTicks - i).setTickInterval(ctx.tickInterval));
 				return;
 			}
+
+			LivingEntity target = aliveTargets.get(ctx.random.nextInt(aliveTargets.size() - 1));
+			int delay = i * ctx.tickInterval;
+
+			if (ctx.world instanceof ServerWorld) {
+				ServerScheduledExecutorService.schedule(delay, () -> {
+					target.damage(ctx.source, finalDamage);
+					CompassUtil.applyKnockbackAndEffects(ctx, target);
+				});
+			}
+			i++;
 		}
-	}));
+	});
 
 	private final CompassDamageCalculationType damageCalculationTypeLogic;
 
