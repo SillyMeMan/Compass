@@ -16,7 +16,7 @@ public enum CompassDamageCalculationTypes implements CompassDamageCalculationTyp
 		float finalDamage = ctx.baseDamage / ctx.targets.size() / ctx.damageTicks;
 
 		for(LivingEntity target : ctx.targets) {
-			for (int i = 0; i > ctx.damageTicks; i--) {
+			for (int i = 0; i < ctx.damageTicks; i++) {
 				int delay = i * ctx.tickInterval;
 
 				ServerScheduledExecutorService.schedule(delay, () -> {
@@ -30,7 +30,7 @@ public enum CompassDamageCalculationTypes implements CompassDamageCalculationTyp
 		float finalDamage = ctx.baseDamage / ctx.damageTicks;
 
 		for (LivingEntity target : ctx.targets) {
-			for (int i = 0; i > ctx.damageTicks; i--) {
+			for (int i = 0; i < ctx.damageTicks; i++) {
 				int delay = i * ctx.tickInterval;
 
 				ServerScheduledExecutorService.schedule(delay, () -> {
@@ -46,7 +46,7 @@ public enum CompassDamageCalculationTypes implements CompassDamageCalculationTyp
 
 		float finalDamage = ctx.baseDamage / ctx.damageTicks;
 
-		for (int i = 0; i > ctx.damageTicks; i--) {
+		for (int i = 0; i < ctx.damageTicks; i++) {
 			int delay = i * ctx.tickInterval;
 
 			ServerScheduledExecutorService.schedule(delay, () -> {
