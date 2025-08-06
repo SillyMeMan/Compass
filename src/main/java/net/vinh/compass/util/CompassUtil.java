@@ -158,7 +158,7 @@ public class CompassUtil {
 		}
 	}
 
-	public static void damageWithCustomLogic(CompassDamageCalculationType damageCalculationType, CompassDamageContext context) {
+	public static void damageWithCustomLogic(CompassDamageCalculationType damageCalculationType, DamageContext context) {
 		damageCalculationType.applyWithCustomLogic(context);
 	}
 
