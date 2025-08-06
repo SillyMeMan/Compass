@@ -163,13 +163,13 @@ public class CompassUtil {
 	}
 
 	public static void applyKnockbackAndEffects(DamageContext ctx, LivingEntity target) {
-		if (!ctx.knockback.equals(Vec3d.ZERO)) {
-			target.addVelocity(ctx.knockback.x, ctx.knockback.y, ctx.knockback.z);
+		if (!ctx.getKnockback().equals(Vec3d.ZERO)) {
+			target.addVelocity(ctx.getKnockback().x, ctx.getKnockback().y, ctx.getKnockback().z);
 			target.velocityModified = true;
 		}
 
-		for (StatusEffectInstance effect : ctx.statusEffects) {
-			target.addStatusEffect(new StatusEffectInstance(effect));
+		for (StatusEffectInstance effect : ctx.getStatusEffects()) {
+			target.addStatusEffect(effect);
 		}
 	}
 
