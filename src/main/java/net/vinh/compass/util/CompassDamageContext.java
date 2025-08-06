@@ -15,7 +15,7 @@ public class CompassDamageContext implements DamageContext{
 	protected List<LivingEntity> targets;
 	protected final Random random;
 
-	protected Vec3d knockback;
+	protected Vec3d knockback = Vec3d.ZERO;
 
 	protected List<StatusEffectInstance> statusEffects;
 
