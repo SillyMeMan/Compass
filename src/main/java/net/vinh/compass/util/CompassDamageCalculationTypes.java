@@ -4,37 +4,34 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.vinh.compass.CompassLib;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static net.vinh.compass.util.CompassUtil.getInt;
 
 public enum CompassDamageCalculationTypes implements CompassDamageCalculationType{
 	DISTRIBUTE((ctx -> {
-		if (ctx.targets.isEmpty()) return;
+		if (ctx.getTargets().isEmpty()) return;
 
-		float finalDamage = ctx.baseDamage / ctx.targets.size() / ctx.damageTicks;
+		float finalDamage = ctx.getBaseDamage() / ctx.getTargets().size() / ctx.getDamageTicks();
 
-		for(LivingEntity target : ctx.targets) {
-			for (int i = 0; i < ctx.damageTicks; i++) {
-				int delay = i * ctx.tickInterval;
+		for(LivingEntity target : ctx.getTargets()) {
+			for (int i = 0; i < ctx.getDamageTicks(); i++) {
+				int delay = i * ctx.getTickInterval();
 
 				ServerScheduledExecutorService.schedule(delay, () -> {
-					target.damage(ctx.source, finalDamage);
+					target.damage(ctx.getDamageSource(), finalDamage);
 					CompassUtil.applyKnockbackAndEffects(ctx, target);
 				});
 			}
 		}
 	})),
 	AOE (ctx -> {
-		float finalDamage = ctx.baseDamage / ctx.damageTicks;
+		float finalDamage = ctx.getBaseDamage() / ctx.getDamageTicks();
 
-		for (LivingEntity target : ctx.targets) {
-			for (int i = 0; i < ctx.damageTicks; i++) {
-				int delay = i * ctx.tickInterval;
+		for (LivingEntity target : ctx.getTargets()) {
+			for (int i = 0; i < ctx.getDamageTicks(); i++) {
+				int delay = i * ctx.getTickInterval();
 
 				ServerScheduledExecutorService.schedule(delay, () -> {
-					target.damage(ctx.source, finalDamage);
+					target.damage(ctx.getDamageSource(), finalDamage);
 					CompassUtil.applyKnockbackAndEffects(ctx, target);
 				});
 			}
@@ -43,53 +40,53 @@ public enum CompassDamageCalculationTypes implements CompassDamageCalculationTyp
 	}),
 	SINGLE_TARGET ((ctx -> {
 		LivingEntity target;
-		if(ctx.targets.size() > 1) {
-			target = ctx.targets.get(ctx.random.nextInt(ctx.targets.size() - 1));
+		if(ctx.getTargets().size() > 1) {
+			target = ctx.getTargets().get(ctx.getRandom().nextInt(ctx.getTargets().size() - 1));
 		}
 		else {
-			target = ctx.targets.get(0);
+			target = ctx.getTargets().get(0);
 		}
 
-		float finalDamage = ctx.baseDamage / ctx.damageTicks;
+		float finalDamage = ctx.getBaseDamage() / ctx.getBaseDamage();
 
-		for (int i = 0; i < ctx.damageTicks; i++) {
-			int delay = i * ctx.tickInterval;
+		for (int i = 0; i < ctx.getDamageTicks(); i++) {
+			int delay = i * ctx.getTickInterval();
 
 			ServerScheduledExecutorService.schedule(delay, () -> {
-				target.damage(ctx.source, finalDamage);
+				target.damage(ctx.getDamageSource(), finalDamage);
 				CompassUtil.applyKnockbackAndEffects(ctx, target);
 			});
 		}
 	})),
 	BOUNCE((ctx) -> {
-		if (ctx.targets.isEmpty()) return;
+		if (ctx.getTargets().isEmpty()) return;
 
-		ctx.targets.removeIf(LivingEntity::isDead);
-		if (ctx.targets.size() < 2) {
-			AOE.applyWithCustomLogic(ctx.setDamageTicks(ctx.bounceTicks).setTickInterval(ctx.tickInterval));
+		ctx.getTargets().removeIf(LivingEntity::isDead);
+		if (ctx.getTargets().size() < 2) {
+			AOE.applyWithCustomLogic(ctx.setDamageTicks(ctx.getBounceTicks()).setTickInterval(ctx.getTickInterval()));
 			return;
 		}
 
-		float finalDamage = ctx.baseDamage / ctx.bounceTicks;
+		float finalDamage = ctx.getBaseDamage() / ctx.getBounceTicks();
 
-		for (int i = 0; i < ctx.bounceTicks; ) {
+		for (int i = 0; i < ctx.getBounceTicks(); ) {
 			// Filter alive targets again just in case
-			List<LivingEntity> aliveTargets = ctx.targets.stream()
+			List<LivingEntity> aliveTargets = ctx.getTargets().stream()
 				.filter(LivingEntity::isAlive)
 				.toList();
 
 			if (aliveTargets.size() < 2) {
 				CompassLib.LOGGER.warn("Insufficient valid targets for bounce. Falling back to AoE.");
-				AOE.applyWithCustomLogic(ctx.setDamageTicks(ctx.bounceTicks - i).setTickInterval(ctx.tickInterval));
+				AOE.applyWithCustomLogic(ctx.setDamageTicks(ctx.getBounceTicks() - i).setTickInterval(ctx.getTickInterval()));
 				return;
 			}
 
-			LivingEntity target = aliveTargets.get(ctx.random.nextInt(aliveTargets.size() - 1));
-			int delay = i * ctx.tickInterval;
+			LivingEntity target = aliveTargets.get(ctx.getRandom().nextInt(aliveTargets.size() - 1));
+			int delay = i * ctx.getTickInterval();
 
-			if (ctx.world instanceof ServerWorld) {
+			if (ctx.getWorld() instanceof ServerWorld) {
 				ServerScheduledExecutorService.schedule(delay, () -> {
-					target.damage(ctx.source, finalDamage);
+					target.damage(ctx.getDamageSource(), finalDamage);
 					CompassUtil.applyKnockbackAndEffects(ctx, target);
 				});
 			}

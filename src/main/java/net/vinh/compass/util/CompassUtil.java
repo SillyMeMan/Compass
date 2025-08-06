@@ -2,16 +2,13 @@ package net.vinh.compass.util;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.*;
-import net.vinh.compass.config.ClientConfig;
 
 import java.util.*;
 import java.util.random.RandomGenerator;
@@ -146,7 +143,7 @@ public class CompassUtil {
 				Vec3d direction = entity.getPos().subtract(center).normalize();
 				Vec3d knockback = new Vec3d(direction.x, direction.y + 1.5, direction.z).normalize().multiply(knockbackMultiplier);
 
-				DamageContext ctx = new DamageContext(List.of(entity), maxDamage / entities.size(), DamageSource.explosion(user), world).withKnockback(knockback).withStatusEffects(List.of(new StatusEffectInstance(StatusEffects.WEAKNESS, 10, 10, true, true)));
+				CompassDamageContext ctx = new CompassDamageContext(world);
 
 				damageWithCustomLogic(CompassDamageCalculationTypes.SINGLE_TARGET, ctx);
 			}
@@ -161,7 +158,7 @@ public class CompassUtil {
 		}
 	}
 
-	public static void damageWithCustomLogic(CompassDamageCalculationType damageCalculationType, DamageContext context) {
+	public static void damageWithCustomLogic(CompassDamageCalculationType damageCalculationType, CompassDamageContext context) {
 		damageCalculationType.applyWithCustomLogic(context);
 	}
 
@@ -200,7 +197,7 @@ public class CompassUtil {
 	}
 
 	public static class ExplosionScheduler {
-		private static final int BLOCKS_PER_TICK = 20;
+		private static final int BLOCKS_PER_TICK = 100;
 		private static final Queue<BlockBreakTask> TASK_QUEUE = new ArrayDeque<>();
 
 		public static void queueExplosion(ServerWorld world, BlockPos center, int radius) {
