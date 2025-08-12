@@ -1,6 +1,5 @@
 package net.vinh.compass;
 
-import net.minecraft.server.world.ServerWorld;
 import net.vinh.compass.helpers.OrtTestItem;
 import net.vinh.compass.setup.CompassParticles;
 import net.minecraft.item.ItemGroup;
