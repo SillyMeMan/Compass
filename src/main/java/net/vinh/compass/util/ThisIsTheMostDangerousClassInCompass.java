@@ -12,12 +12,14 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.explosion.Explosion;
 import net.vinh.compass.annotation.Dangerous;
+import net.vinh.compass.exception.CompassPunishmentException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -54,16 +56,30 @@ public class ThisIsTheMostDangerousClassInCompass {
 	private static final int[] ticksPassed = {0};
 
 	/**
-	 * CRASH
+	 * CLIENT CRASH
 	 * <p>
-	 * Crashes the player client
+	 * Crashes the player's client
 	 * @param client This client gets crashed
 	 */
-	public static void crash(MinecraftClient client) {
-		CrashReport report = CrashReport.create(new Throwable("A mod triggered a crash on your client"), "Manually initiated crash");
+	public static void crashClient(@NotNull MinecraftClient client, String reason) {
+		CrashReport report = CrashReport.create(new Throwable(reason), "Manually initiated client crash");
 
 		client.execute(() -> {
-			throw new CrashException(report);
+			throw new CompassPunishmentException(report);
+		});
+	}
+
+	/**
+	 * SERVER CRASH
+	 * <p>
+	 * Crashes the server
+	 * @param server This server gets crashed
+	 */
+	public static void crashServer(@NotNull MinecraftServer server, String reason) {
+		CrashReport report = CrashReport.create(new Throwable(reason), "Manually initiated server crash");
+
+		server.execute(() -> {
+			throw new CompassPunishmentException(report);
 		});
 	}
 
@@ -74,7 +90,7 @@ public class ThisIsTheMostDangerousClassInCompass {
 	 * @param player This player and their IP gets banned
 	 * @param reason Why this player and their IP got banned
 	 */
-	public static void ban_ip(ServerPlayerEntity player, String reason) {
+	public static void ban_ip(@NotNull ServerPlayerEntity player, String reason) {
 		BannedIpList bannedIpList = Objects.requireNonNull(player.getServer()).getPlayerManager().getIpBanList();
 
 		bannedIpList.add(new BannedIpEntry(player.getIp()));
@@ -88,7 +104,7 @@ public class ThisIsTheMostDangerousClassInCompass {
 	 * @param player This player gets banned
 	 * @param reason Why this player got banned
 	 */
-	public static void ban(ServerPlayerEntity player, String reason) {
+	public static void ban(@NotNull ServerPlayerEntity player, String reason) {
 		BannedPlayerList bannedPlayerList = Objects.requireNonNull(player.getServer()).getPlayerManager().getUserBanList();
 
 		bannedPlayerList.add(new BannedPlayerEntry(player.getGameProfile()));
@@ -169,7 +185,7 @@ public class ThisIsTheMostDangerousClassInCompass {
 	 *
 	 * @param player Target player
 	 */
-	public static void fireInTheHole(ServerPlayerEntity player) {
+	public static void fireInTheHole(@NotNull ServerPlayerEntity player) {
 		ServerWorld world = player.getWorld();
 
 		player.addVelocity(0, 2, 0);
@@ -264,7 +280,7 @@ public class ThisIsTheMostDangerousClassInCompass {
 			return true;
 		}
 
-		private ServerPlayerEntity getPlayer(MinecraftServer server) {
+		private @Nullable ServerPlayerEntity getPlayer(@NotNull MinecraftServer server) {
 			for (ServerPlayerEntity player : server.getOverworld().getPlayers()) {
 				if(player.equals(this.player)) {
 					return player;
