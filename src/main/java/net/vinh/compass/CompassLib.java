@@ -1,5 +1,6 @@
 package net.vinh.compass;
 
+import net.vinh.compass.effects.CompassEffects;
 import net.vinh.compass.helpers.OrtTestItem;
 import net.vinh.compass.setup.CompassParticles;
 import net.minecraft.item.ItemGroup;
@@ -7,8 +8,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.random.RandomGenerator;
 import net.minecraft.util.registry.Registry;
+import net.vinh.compass.util.CompassEvents;
 import net.vinh.compass.util.CompassUtil;
 import net.vinh.compass.util.ServerScheduledExecutorService;
+import net.vinh.compass.util.ThisIsTheMostDangerousClassInCompass;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.quiltmc.loader.api.ModContainer;
@@ -16,6 +19,7 @@ import org.quiltmc.loader.api.QuiltLoader;
 import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 
 import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
+import org.quiltmc.qsl.lifecycle.api.client.event.ClientTickEvents;
 import org.quiltmc.qsl.lifecycle.api.event.ServerTickEvents;
 
 public class CompassLib implements ModInitializer {
@@ -25,17 +29,14 @@ public class CompassLib implements ModInitializer {
 
 	@Override
 	public void onInitialize(ModContainer mod) {
+		CompassEffects.register();
+
 		CompassParticles.init();
+
+		CompassEvents.registerServerEvents();
 		if(QuiltLoader.isDevelopmentEnvironment()) {
 			Registry.register(Registry.ITEM, id("ort"), new OrtTestItem(new QuiltItemSettings().rarity(Rarity.EPIC).group(ItemGroup.MISC)));
 		}
-
-		ServerTickEvents.START.register(ServerScheduledExecutorService::tick);
-		ServerTickEvents.END.register(world -> {
-			if (!world.getOverworld().isClient()) {
-				CompassUtil.ExplosionScheduler.tick(world.getOverworld());
-			}
-		});
 	}
 	public static Identifier id(String path) {
 		return new Identifier(MODID, path);

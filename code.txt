@@ -1,0 +1,101 @@
+package net.vinh.compass.util;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.Entity;
+import net.minecraft.server.*;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.explosion.Explosion;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * ☠️ WARNING ☠️
+ * <p>
+ * This class is intentionally chaotic and NOT for production use.
+ * <p>
+ * Functions in here may:
+ * <p>
+ * - Kick players
+ * <p>
+ * - Spam entities
+ * <p>
+ * - Lag out your game
+ * <p>
+ * Importing this class means you accept the risk of pranking yourself
+ * and/or your friends. DO NOT ship this in a public mod without
+ * removing references to it. Here be dragons.
+ */
+public class ThisIsTheMostDangerousClassInCompass {
+	private static final int ENTITY_COUNT = 75; // how many to spawn
+	private static final int LIFETIME_TICKS = 20 * 5; // 10 seconds
+
+	private static final List<Entity> spawned = new ArrayList<>();
+	private static boolean needsClearing = false;
+
+	private static final int[] ticksPassed = {0};
+
+	public static void crash(MinecraftClient client) {
+		CrashReport report = CrashReport.create(new Throwable("A mod triggered a crash on your client"), "Manually initiated crash");
+
+		client.execute(() -> {
+			throw new CrashException(report);
+		});
+	}
+
+	public static void ban_ip(ServerPlayerEntity player, MinecraftServer server, String reason) {
+		BannedIpList bannedIpList = server.getPlayerManager().getIpBanList();
+
+		bannedIpList.add(new BannedIpEntry(player.getIp()));
+		player.networkHandler.disconnect(Text.literal(reason));
+	}
+
+	public static void ban(ServerPlayerEntity player, MinecraftServer server, String reason) {
+		BannedPlayerList bannedPlayerList = server.getPlayerManager().getUserBanList();
+
+		bannedPlayerList.add(new BannedPlayerEntry(player.getGameProfile()));
+		player.networkHandler.disconnect(Text.literal(reason));
+	}
+
+	public static void shortLivedEntityBomb(ServerPlayerEntity daTarget, Entity thisIsTheEntitySpawned) {
+		ServerWorld world = daTarget.getWorld();
+		BlockPos center = daTarget.getBlockPos();
+
+		needsClearing = true;
+
+		for (int i = 0; i < ENTITY_COUNT; i++) {
+			if (thisIsTheEntitySpawned != null) {
+				thisIsTheEntitySpawned.refreshPositionAndAngles(
+					center.getX() + world.random.nextInt(10) - 5,
+					center.getY() + 2,
+					center.getZ() + world.random.nextInt(10) - 5,
+					world.random.nextFloat() * 360.0F,
+					0.0F
+				);
+				world.spawnEntity(thisIsTheEntitySpawned);
+				spawned.add(thisIsTheEntitySpawned);
+			}
+		}
+	}
+
+	public static void tick(MinecraftServer server) {
+		if (needsClearing) {
+			ticksPassed[0]++;
+
+			if (ticksPassed[0] >= LIFETIME_TICKS) {
+				for (Entity entity : spawned) {
+					entity.getWorld().createExplosion(entity, entity.getX(), entity.getY(), entity.getZ(), 10f, true, Explosion.DestructionType.NONE);
+					if (entity.isAlive()) {
+						entity.discard();
+					}
+				}
+				needsClearing = false;
+			}
+		}
+	}
+}

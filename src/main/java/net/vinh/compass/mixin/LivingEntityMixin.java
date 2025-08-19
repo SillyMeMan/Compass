@@ -1,5 +1,8 @@
 package net.vinh.compass.mixin;
 
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
+import net.vinh.compass.effects.CompassEffects;
 import net.vinh.compass.event.ServerLivingEntityEvents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,6 +37,17 @@ public abstract class LivingEntityMixin {
 		LivingEntity entity = (LivingEntity) (Object) this;
 		if (!ServerLivingEntityEvents.ALLOW_DAMAGE.invoker().allowDamage(entity, source, amount)) {
 			cir.setReturnValue(false);
+		}
+	}
+
+	@Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
+	private void compass$unstableEye(CallbackInfoReturnable<Boolean> cir) {
+		MinecraftClient client = MinecraftClient.getInstance();
+		PlayerEntity local = client.player;
+		LivingEntity self = (LivingEntity)(Object)this;
+
+		if (local != null && local.hasStatusEffect(CompassEffects.AURA_VEIL) && self != local && self instanceof PlayerEntity) {
+			cir.setReturnValue(true);
 		}
 	}
 }
