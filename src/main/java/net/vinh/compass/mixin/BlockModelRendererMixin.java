@@ -19,50 +19,35 @@ import net.vinh.compass.util.ThisIsTheMostDangerousClassInCompass;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Random;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BlockModelRenderer.class)
 public abstract class BlockModelRendererMixin {
-	@Inject(method = "render*", at = @At("HEAD"), cancellable = true)
-	private void compass$useGlitchTextures(BlockRenderView world, BakedModel model, BlockState state, BlockPos pos, MatrixStack matrices, VertexConsumer vertices, boolean cull, Random random, long seed, int overlay, CallbackInfoReturnable<Boolean> cir) {
+	@Inject(method = "render(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/client/render/model/BakedModel;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/client/util/math/MatrixStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;ZLnet/minecraft/util/random/RandomGenerator;JI)V", at = @At("HEAD"))
+	private void compass$useGlitchTextures(BlockRenderView world, BakedModel model, BlockState state, BlockPos pos, MatrixStack matrix, VertexConsumer vertexConsumer, boolean cull, RandomGenerator random, long seed, int overlay, CallbackInfo ci) {
 		if (ThisIsTheMostDangerousClassInCompass.MissingTexturePrank.shouldGlitch(pos)) {
 			if (!ThisIsTheMostDangerousClassInCompass.MissingTexturePrank.shouldGlitch(pos)) return;
 
-			// Grab the purple/black checker sprite
 			Sprite missing = MinecraftClient.getInstance()
 				.getSpriteAtlas(SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE)
 				.apply(MissingSprite.getMissingSpriteId());
 
-			// Gather quads (all faces + null = non-directional)
 			java.util.List<BakedQuad> quads = new java.util.ArrayList<>();
-			for (Direction d : Direction.values()) quads.addAll(model.getQuads(state, d, (RandomGenerator) random));
-			quads.addAll(model.getQuads(state, null, (RandomGenerator) random));
+			for (Direction d : Direction.values()) quads.addAll(model.getQuads(state, d, random));
+			quads.addAll(model.getQuads(state, null, random));
 
 			// Light for this block
 			int light = WorldRenderer.getLightmapCoordinates(world, state, pos);
 
-			MatrixStack.Entry entry = matrices.peek();
+			MatrixStack.Entry entry = matrix.peek();
 
 			for (BakedQuad q : quads) {
-				// Build a new quad with the missing sprite
-				// NOTE: use whichever name your Yarn has: getColorIndex() or getTintIndex()
 				int[] data = q.getVertexData().clone();
-				int tint = (hasGetColorIndex(q) ? q.getColorIndex() : q.getColorIndex());
+				int tint = (q.getColorIndex());
 				BakedQuad missingQuad = new BakedQuad(data, tint, q.getFace(), missing, q.hasShade());
 
-				// 7-arg helper: matrices, quad, r, g, b, light, overlay
-				vertices.bakedQuad(entry, missingQuad, 1f, 1f, 1f, light, overlay);
+				vertexConsumer.bakedQuad(entry, missingQuad, 1f, 1f, 1f, light, overlay);
 			}
-
-			// We rendered it ourselves; stop vanilla
-			cir.setReturnValue(true);
 		}
-	}
-
-	private static boolean hasGetColorIndex(BakedQuad q) {
-		try { q.getClass().getMethod("getColorIndex"); return true; }
-		catch (NoSuchMethodException e) { return false; }
 	}
 }
